@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Memoria con Vasos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 40px;
+        }
+        h1 {
+            color: #333;
+        }
+        #vasos-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .vaso {
+            width: 100px;
+            height: 150px;
+            background-color: #3498db;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Juego de Memoria con Vasos</h1>
+    <div id="vasos-container"></div>
+
+    <script>
+        const vasos = [
+            { id: 1, color: "#e74c3c" },
+            { id: 2, color: "#2ecc71" },
+            { id: 3, color: "#f39c12" },
+            { id: 4, color: "#3498db" },
+            { id: 5, color: "#9b59b6" },
+            { id: 6, color: "#e67e22" },
+            { id: 7, color: "#1abc9c" },
+            { id: 8, color: "#c0392b" }
+        ];
+
+        const vasosContainer = document.getElementById("vasos-container");
+
+        // Inicializar el juego
+        reiniciarJuego();
+
+        let seleccionados = [];
+        let paresEncontrados = 0;
+        let vasosAEncontrar = 2; // Número inicial de vasos a encontrar
+
+        function reiniciarJuego() {
+            // Limpiar el contenedor
+            vasosContainer.innerHTML = "";
+
+            // Barajar y seleccionar los vasos adecuados
+            const vasosBarajados = barajarVasos(vasos);
+            const vasosSeleccionados = vasosBarajados.slice(0, vasosAEncontrar);
+
+            // Crear los elementos de los vasos
+            vasosSeleccionados.forEach(vaso => {
+                const vasoElement = document.createElement("div");
+                vasoElement.classList.add("vaso");
+                vasoElement.dataset.id = vaso.id;
+                vasoElement.style.backgroundColor = vaso.color;
+                vasoElement.addEventListener("click", voltearVaso);
+                vasosContainer.appendChild(vasoElement);
+            });
+        }
+
+        function barajarVasos(array) {
+            return array.slice().sort(() => Math.random() - 0.5);
+        }
+
+        function voltearVaso(event) {
+            const vaso = event.target;
+
+            if (seleccionados.length < 2 && !seleccionados.includes(vaso)) {
+                vaso.style.backgroundColor = vasos.find(v => v.id == vaso.dataset.id).color;
+                seleccionados.push(vaso);
+
+                if (seleccionados.length === 2) {
+                    setTimeout(verificarEmparejados, 500);
+                }
+            }
+        }
+
+        function verificarEmparejados() {
+            const [vaso1, vaso2] = seleccionados;
+
+            if (vaso1.dataset.id === vaso2.dataset.id) {
+                // Emparejados
+                paresEncontrados++;
+
+                if (paresEncontrados === vasos.length / 2) {
+                    // Reiniciar el juego con más vasos a encontrar
+                    paresEncontrados = 0;
+                    vasosAEncontrar = Math.min(vasosAEncontrar + 1, vasos.length / 2);
+                    reiniciarJuego();
+                }
+            } else {
+                // No emparejados, volver a ocultar
+                vaso1.style.backgroundColor = "#3498db";
+                vaso2.style.backgroundColor = "#3498db";
+            }
+
+            seleccionados = [];
+        }
+    </script>
+</body>
+</html>
